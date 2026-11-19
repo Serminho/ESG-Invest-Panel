@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Desafio ASG | Grupo 2 — Painel MVP</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- SheetJS: lê o arquivo .xlsx no navegador (expõe o global XLSX) -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="masthead">
+        <div class="eyebrow">Desafio ASG · Investe Piauí · Grupo 2</div>
+        <h1>Indicadores para orientar decisões</h1>
+        <p id="themeSummary">Carregando temas…</p>
+        <div class="top-meta" id="headerStats"></div>
+      </header>
+
+      <nav class="nav" id="nav" aria-label="Navegação do painel"></nav>
+
+      <div class="filters">
+        <span id="filterSelects"></span>
+        <input
+          id="search"
+          class="filter-control"
+          type="search"
+          placeholder="Buscar indicador, tema, fonte ou responsável…"
+          aria-label="Buscar nos indicadores"
+        />
+        <button id="clearFilters" class="clear" type="button">Limpar filtros</button>
+        <label class="clear">
+          Abrir planilha…
+          <input id="fileInput" type="file" accept=".xlsx" hidden />
+        </label>
+      </div>
+
+      <main>
+        <section class="page active" id="page" aria-live="polite"></section>
+      </main>
+
+      <footer class="footer">
+        <span>Fonte: <span id="sourceName">planilha</span> · links e documentos na aba Dim_Fonte.</span>
+        <span>Uso correto: benchmarks são referência externa; não representam desempenho nem metas da Investe.</span>
+      </footer>
+    </div>
+  </body>
+</html>
