@@ -7,6 +7,8 @@ import { buildCatalog } from "./data/CatalogBuilder.js";
 import { XlsxWorkbookSource } from "./infra/XlsxWorkbookSource.js";
 import { Store } from "./state/Store.js";
 import { DashboardController, initialState } from "./ui/DashboardController.js";
+import { initThemeToggle } from "./ui/ThemeToggle.js";
+import { initExpandAll, initShortcuts, initBackToTop } from "./ui/UiEnhancements.js";
 import { createViews } from "./ui/views/index.js";
 
 export function queryDom(root = document) {
@@ -29,6 +31,22 @@ export function queryDom(root = document) {
 }
 
 function start() {
+  initThemeToggle(document.querySelector("#themeToggle"));
+  document
+    .querySelector("#exportReport")
+    ?.addEventListener("click", () => globalThis.print());
+
+  initExpandAll(
+    document.querySelector("#toggleAllDetails"),
+    document.querySelector("#page"),
+  );
+  initShortcuts({
+    searchInput: document.querySelector("#search"),
+    themeButton: document.querySelector("#themeToggle"),
+    exportButton: document.querySelector("#exportReport"),
+  });
+  initBackToTop(document.querySelector("#backToTop"));
+
   const controller = new DashboardController({
     dom: queryDom(),
     store: new Store(initialState(CONFIG.filters)),
