@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Desafio ASG | Grupo 2 — Painel MVP</title>
+    <title>Desafio ASG | Investe Piauí — Painel MVP</title>
     <link rel="stylesheet" href="style.css" />
     <!-- SheetJS: lê o arquivo .xlsx no navegador (expõe o global XLSX) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
@@ -12,7 +12,33 @@
   <body>
     <div class="shell">
       <header class="masthead">
-        <div class="eyebrow">Desafio ASG · Investe Piauí · Grupo 2</div>
+        <div class="masthead-top">
+          <div class="brand-block">
+            <div class="brand-logo-wrap">
+              <img
+                src="assets/logo-investe-piaui.png"
+                alt="Logo Investe Piauí"
+                class="brand-logo"
+              />
+            </div>
+            <div class="eyebrow">Desafio ASG · Investe Piauí · Grupo 2</div>
+          </div>
+
+          <div class="masthead-actions">
+            <button
+              id="themeToggle"
+              class="action-btn"
+              type="button"
+              aria-pressed="false"
+            >
+              ☾ Modo escuro
+            </button>
+            <button id="exportReport" class="action-btn" type="button">
+              ⎙ Exportar relatório
+            </button>
+          </div>
+        </div>
+
         <h1>Indicadores para orientar decisões</h1>
         <p id="themeSummary">Carregando temas…</p>
         <div class="top-meta" id="headerStats"></div>
@@ -26,10 +52,11 @@
           id="search"
           class="filter-control"
           type="search"
-          placeholder="Buscar indicador, tema, fonte ou responsável…"
+          placeholder="Buscar indicador, tema, fonte ou responsável… (atalho: /)"
           aria-label="Buscar nos indicadores"
         />
         <button id="clearFilters" class="clear" type="button">Limpar filtros</button>
+        <button id="toggleAllDetails" class="clear" type="button">Expandir detalhes</button>
         <label class="clear">
           Abrir planilha…
           <input id="fileInput" type="file" accept=".xlsx" hidden />
@@ -45,5 +72,15 @@
         <span>Uso correto: benchmarks são referência externa; não representam desempenho nem metas da Investe.</span>
       </footer>
     </div>
+
+    <button
+      id="backToTop"
+      class="back-to-top"
+      type="button"
+      aria-label="Voltar ao topo"
+      title="Voltar ao topo"
+    >
+      ↑
+    </button>
   </body>
 </html>

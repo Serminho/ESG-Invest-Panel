@@ -621,3 +621,240 @@ a:hover {
     font-size: 23px;
   }
 }
+
+/* =========================================================
+   Identidade Investe Piauí (Logo + Ações do Cabeçalho)
+   ========================================================= */
+.masthead-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.brand-logo-wrap {
+  background: #ffffff;
+  padding: 6px 14px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+}
+.brand-logo {
+  height: 34px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+.masthead-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.action-btn {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 13px;
+  border-radius: 999px;
+  backdrop-filter: blur(4px);
+  transition: background 0.18s, transform 0.18s;
+}
+.action-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   Modo Escuro (Dark Mode via [data-theme="dark"])
+   ========================================================= */
+[data-theme="dark"] {
+  --ink: #e4edf5;
+  --muted: #98aec2;
+  --navy: #dceeff;
+  --blue: #58b8d4;
+  --paper: #0c1724;
+  --card: #132234;
+  --line: #23384f;
+  --soft: #173042;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+[data-theme="dark"] a {
+  color: #63c7dc;
+}
+[data-theme="dark"] a:hover {
+  color: #9be4f2;
+}
+[data-theme="dark"] .masthead {
+  background: linear-gradient(117deg, #0b1e33 5%, #123e54 66%, #0f6e6d);
+}
+[data-theme="dark"] .nav button {
+  background: var(--card);
+  color: #b7ccde;
+  border-color: var(--line);
+}
+[data-theme="dark"] .nav button.active {
+  background: #176b87;
+  color: #ffffff;
+  border-color: #176b87;
+}
+[data-theme="dark"] .filter-control {
+  background: var(--card);
+  color: var(--ink);
+  border-color: var(--line);
+}
+[data-theme="dark"] .tag {
+  background: #16333a;
+  border-color: #24515a;
+  color: #9ce0d7;
+}
+[data-theme="dark"] .note {
+  background: #2b2316;
+  color: #f0d7a8;
+}
+[data-theme="dark"] .note strong {
+  color: #ffe8bd;
+}
+[data-theme="dark"] .callout {
+  background: #122b2e;
+  border-color: #1f4b50;
+  color: #bfe7e2;
+}
+[data-theme="dark"] .mini-metric,
+[data-theme="dark"] .record-body,
+[data-theme="dark"] .data-table td {
+  border-color: var(--line);
+}
+[data-theme="dark"] .mini-metric span,
+[data-theme="dark"] .bar-label,
+[data-theme="dark"] .stat-card .stat-label,
+[data-theme="dark"] .detail-text {
+  color: #b7ccde;
+}
+[data-theme="dark"] .stat-card,
+[data-theme="dark"] .record,
+[data-theme="dark"] .empty {
+  background: var(--card);
+  border-color: var(--line);
+}
+[data-theme="dark"] .record-name {
+  color: #e4edf5;
+}
+[data-theme="dark"] .record summary:hover,
+[data-theme="dark"] .data-table tr:hover td {
+  background: #192c42;
+}
+[data-theme="dark"] .record-body {
+  background: #0f1c2b;
+}
+[data-theme="dark"] .bar-track {
+  background: #1e3348;
+}
+[data-theme="dark"] .data-table th {
+  background: #182b40;
+  color: #b7ccde;
+}
+
+/* =========================================================
+   Exportação de Relatório (@media print -> Salvar como PDF)
+   ========================================================= */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  :root,
+  [data-theme="dark"] {
+    --ink: #14263d;
+    --muted: #526477;
+    --navy: #102b46;
+    --paper: #ffffff;
+    --card: #ffffff;
+    --line: #cfd9e0;
+    --shadow: none;
+  }
+  body {
+    background: #ffffff !important;
+    color: #14263d !important;
+  }
+  .shell {
+    max-width: 100%;
+    padding: 0;
+  }
+  .nav,
+  .filters,
+  .masthead-actions,
+  .record-toggle {
+    display: none !important;
+  }
+  .masthead {
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+    box-shadow: none;
+  }
+  .theme-card,
+  .panel,
+  .section-card,
+  .metric,
+  .stat-card,
+  .record {
+    break-inside: avoid;
+    box-shadow: none !important;
+    background: #ffffff !important;
+    color: #14263d !important;
+  }
+}
+
+/* =========================================================
+   Botão Flutuante "Voltar ao Topo"
+   ========================================================= */
+.back-to-top {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--navy);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 8px 20px rgba(16, 43, 70, 0.25);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.2s, transform 0.2s, background 0.18s;
+  z-index: 50;
+}
+.back-to-top.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.back-to-top:hover {
+  background: var(--blue);
+  transform: translateY(-2px);
+}
+[data-theme="dark"] .back-to-top {
+  background: #176b87;
+  border-color: #2c6d82;
+  color: #ffffff;
+}
+@media print {
+  .back-to-top {
+    display: none !important;
+  }
+}
