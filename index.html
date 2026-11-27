@@ -12,55 +12,71 @@
   <body>
     <div class="shell">
       <header class="masthead">
-        <div class="masthead-top">
-          <div class="brand-block">
-            <div class="brand-logo-wrap">
-              <img
-                src="assets/logo-investe-piaui.png"
-                alt="Logo Investe Piauí"
-                class="brand-logo"
-              />
-            </div>
-            <div class="eyebrow">Desafio ASG · Investe Piauí · Grupo 2</div>
-          </div>
-
-          <div class="masthead-actions">
-            <button
-              id="themeToggle"
-              class="action-btn"
-              type="button"
-              aria-pressed="false"
-            >
-              ☾ Modo escuro
-            </button>
-            <button id="exportReport" class="action-btn" type="button">
-              ⎙ Exportar relatório
-            </button>
-          </div>
+        <div class="brand-logo-wrap">
+          <img
+            src="assets/logo-investe-piaui.png"
+            alt="Logo Investe Piauí"
+            class="brand-logo"
+          />
         </div>
 
-        <h1>Indicadores para orientar decisões</h1>
-        <p id="themeSummary">Carregando temas…</p>
-        <div class="top-meta" id="headerStats"></div>
+        <div class="masthead-body">
+          <div class="masthead-top">
+            <div class="eyebrow">Desafio ASG · Investe Piauí · Grupo 2</div>
+
+            <div class="masthead-actions">
+              <button
+                id="themeToggle"
+                class="action-btn"
+                type="button"
+                aria-pressed="false"
+              >
+                ☾ Modo escuro
+              </button>
+              <button id="exportReport" class="action-btn" type="button">
+                ⎙ Exportar relatório
+              </button>
+            </div>
+          </div>
+
+          <h1>Indicadores para orientar decisões</h1>
+          <p id="themeSummary">Carregando temas…</p>
+          <div class="top-meta" id="headerStats"></div>
+        </div>
       </header>
 
       <nav class="nav" id="nav" aria-label="Navegação do painel"></nav>
 
       <div class="filters">
-        <span id="filterSelects"></span>
-        <input
-          id="search"
-          class="filter-control"
-          type="search"
-          placeholder="Buscar indicador, tema, fonte ou responsável… (atalho: /)"
-          aria-label="Buscar nos indicadores"
-        />
-        <button id="clearFilters" class="clear" type="button">Limpar filtros</button>
-        <button id="toggleAllDetails" class="clear" type="button">Expandir detalhes</button>
-        <label class="clear">
-          Abrir planilha…
-          <input id="fileInput" type="file" accept=".xlsx" hidden />
-        </label>
+        <div class="filters-bar">
+          <button
+            id="filtersToggle"
+            class="filters-toggle"
+            type="button"
+            aria-expanded="false"
+            aria-controls="filtersPanel"
+          >
+            <span aria-hidden="true">☰</span> Filtros
+            <span id="filtersCount" class="filters-count" hidden></span>
+          </button>
+          <input
+            id="search"
+            class="filter-control"
+            type="search"
+            placeholder="Buscar indicador, tema, fonte ou responsável… (atalho: /)"
+            aria-label="Buscar nos indicadores"
+          />
+          <button id="clearFilters" class="clear" type="button">Limpar filtros</button>
+          <button id="toggleAllDetails" class="clear" type="button">Expandir detalhes</button>
+          <label class="clear">
+            Abrir planilha…
+            <input id="fileInput" type="file" accept=".xlsx" hidden />
+          </label>
+        </div>
+
+        <div id="filtersPanel" class="filters-panel" role="region" aria-label="Filtros" hidden>
+          <div id="filterSelects" class="filter-grid"></div>
+        </div>
       </div>
 
       <main>

@@ -34,7 +34,7 @@ export class IndicatorFilter {
   }
 }
 
-/** Campos simples comparam igualdade; campos com lista (ex.: normas GRI) exigem o valor na lista. */
+/** Campos simples comparam igualdade; campos com lista (ex.: conexão GRI) exigem o valor na lista. */
 function hasValue(actual, expected) {
   return Array.isArray(actual) ? actual.includes(expected) : actual === expected;
 }

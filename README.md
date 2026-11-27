@@ -98,7 +98,7 @@ Tudo que depende do formato fica em `js/config.js`:
 - `themesInScope`: temas exibidos. `null` mostra todos; ex.: `["T8", "T12"]`.
 - `sheets`: nome de cada aba e o cabeçalho de cada coluna. Se renomear uma coluna na planilha, ajuste aqui.
 - `periodFilter.windowYears`: quantos anos o filtro De / Até oferece (padrão: 10).
-- `filters`: campos dos filtros de seleção (`origin`, `status`, `griStandards`) e seus textos. Um filtro sem nenhum valor na planilha não aparece.
+- `filters`: campos dos filtros de seleção (`origin`, `status`, `griConnection`), com rótulo e textos, exibidos no painel "Filtros". `options` fixa a lista de opções; `onlyWithGri` esconde o filtro quando a planilha não tem a aba Dim_GRI. Um filtro sem nenhum valor na planilha não aparece.
 - `internalOriginPrefix`: início da coluna `Atuação` que marca um indicador interno.
 - `themeAccents` e `fallbackAccents`: cores de cada tema.
 - `highlightsPerTheme`: quantos indicadores aparecem em destaque por tema na visão geral.
@@ -109,19 +109,20 @@ Se faltar uma aba obrigatória ou uma coluna, o painel mostra qual está faltand
 
 - **Visão geral:** números do catálogo, destaques por tema e a lista completa filtrada.
 - **Uma página por tema (T8, T9, T12):** leituras do tema no topo, indicadores agrupados por universo de pesquisa (externos) ou por pilar (internos), e a lista de catálogo.
-- **Conexão GRI** (aparece quando a planilha tem a `Dim_GRI`): cobertura por tema, índice das divulgações GRI por grupo (Universal, Econômico, Ambiental, Social, Setorial) com os indicadores ligados e as justificativas, e a lista de indicadores sem correspondência.
 - **Catálogo completo:** lista detalhada de todos os indicadores filtrados.
 
 Cada indicador tem um detalhe expansível com propósito, definição, universo, limite de interpretação, classificação, fonte com link, observações e normas GRI. Os códigos GRI também aparecem como selos abaixo do nome, coloridos pelo tipo de vínculo.
 
-A página ativa fica no endereço (`#overview`, `#T8`, `#gri`, `#catalog`…), então dá para compartilhar o link de uma página e usar o botão Voltar do navegador.
+A página ativa fica no endereço (`#overview`, `#T8`, `#catalog`…), então dá para compartilhar o link de uma página e usar o botão Voltar do navegador.
 
 ## Filtros
+
+Os filtros de seleção ficam no painel **Filtros**, aberto pelo botão ao lado da busca. O botão mostra quantos filtros estão ativos, então o painel pode ficar fechado sem esconder que há um filtro aplicado. Para um filtro novo, basta acrescentar um item em `filters` no `config.js`.
 
 - **Período (De / Até):** dois seletores com os últimos 10 anos, contados a partir do ano atual (em 2026: de 2017 a 2026). O período de um indicador é o da observação mais recente ou, na falta dela, o período de referência da `Dim_Indicador`. O indicador aparece se algum ano dele cair no intervalo: um período "2023–2024" entra em "De 2024". Basta preencher um dos lados para ter um limite aberto ("De 2024" = de 2024 em diante). Se um ano escolhido passar do outro limite, o outro acompanha. Indicadores sem período (os internos propostos) saem quando há limite.
 - **Atuação:** a origem exata de cada indicador (ex.: "Externo — benchmark público" ou "Interno — indicador fictício proposto").
 - **Classificação do dado:** valores da coluna `Classificação do dado`.
-- **Norma GRI:** indicadores com vínculo à norma escolhida (ex.: "GRI 404: Capacitação e Educação 2016"). Na página Conexão GRI, o índice mostra só as divulgações dessa norma.
+- **Conexão GRI** (aparece quando a planilha tem a `Dim_GRI`): com vínculo GRI, por tipo de vínculo (Atende, Apoia, Contexto) ou sem vínculo GRI.
 - **Busca:** texto livre em código, nome, tema, atuação, propósito, definição, unidade, limite, pilar, periodicidade, universo, fonte, instituição, observações (período e geografia) e normas GRI (código, título e tipo de vínculo; ex.: "404-1").
 
 ## Arquitetura
@@ -157,12 +158,11 @@ js/
     views/
       OverviewView.js         visão geral
       ThemeView.js            uma página por tema
-      GriView.js              Conexão GRI
       CatalogView.js          catálogo completo
       index.js                registra as páginas
 tests/
   catalog.test.js             montagem do catálogo, ligações, filtros e GRI
-  ui.test.js                  escape, formatação, parse, destaques e página GRI
+  ui.test.js                  escape, formatação, parse, destaques e filtro GRI
   fakeWorkbook.js             planilha falsa usada pelos testes
 ```
 

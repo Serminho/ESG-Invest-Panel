@@ -145,17 +145,20 @@ test("GRI: código sem cadastro aparece só com o código; divulgação sem indi
   assert.equal(catalog.griDisclosures[1].safeUrl, "", "URL que não é http(s) não vira link");
 });
 
-test("GRI: filtro por norma, busca por código e planilha sem as abas", () => {
+test("GRI: filtro de conexão, busca por código e planilha sem as abas", () => {
   const catalog = buildCatalog(fakeWorkbook(griSheets()), CONFIG);
   const search = (options) => ids(catalog.search(new IndicatorFilter(options)));
-  assert.deepEqual(search({ criteria: { griStandards: "GRI 203: Impactos Econômicos Indiretos 2016" } }), ["T8-01", "T9-21"]);
+  const linked = ids(catalog.indicators.filter((i) => i.griLinks.length > 0));
+  assert.deepEqual(search({ criteria: { griConnection: "com" } }), linked);
+  assert.deepEqual(search({ criteria: { griConnection: "atende" } }), ["T9-21"]);
+  assert.deepEqual(search({ criteria: { griConnection: "contexto" } }), ["T8-01"]);
+  assert.deepEqual(search({ criteria: { griConnection: "sem" } }),
+    ids(catalog.indicators.filter((i) => i.griLinks.length === 0)));
   assert.deepEqual(search({ query: "404-1" }), ["T9-21"]);
-  assert.deepEqual(catalog.distinctValues("griStandards"),
-    ["GRI 203: Impactos Econômicos Indiretos 2016", "GRI 404: Capacitação e Educação 2016", "GRI 999-9"]);
 
   const plain = buildCatalog(fakeWorkbook(sheets()), CONFIG);
   assert.equal(plain.hasGri, false);
-  assert.deepEqual(plain.distinctValues("griStandards"), []);
+  assert.deepEqual(plain.distinctValues("griConnection"), ["sem"]);
   assert.deepEqual(plain.indicators[0].griLinks, []);
 });
 

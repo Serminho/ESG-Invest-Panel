@@ -30,12 +30,29 @@ export const CONFIG = Object.freeze({
    */
   periodFilter: { windowYears: 10 },
 
-  /** Filtros de seleção; as opções vêm dos valores da planilha. */
+  /**
+   * Filtros de seleção, exibidos no painel "Filtros". Sem `options`, as opções vêm
+   * dos valores da planilha; com `options`, a lista é fixa (só aparecem as que têm
+   * indicador). `onlyWithGri` esconde o filtro quando a planilha não tem a aba Dim_GRI.
+   */
   filters: [
-    { field: "origin", allLabel: "Externos e internos", ariaLabel: "Filtrar por atuação" },
-    { field: "status", allLabel: "Todas as classificações", ariaLabel: "Filtrar por classificação do dado" },
-    // Campo com vários valores: o indicador passa se tiver vínculo com a norma escolhida.
-    { field: "griStandards", allLabel: "Todas as normas GRI", ariaLabel: "Filtrar por norma GRI" },
+    { field: "origin", label: "Atuação", allLabel: "Externos e internos", ariaLabel: "Filtrar por atuação" },
+    { field: "status", label: "Classificação do dado", allLabel: "Todas as classificações", ariaLabel: "Filtrar por classificação do dado" },
+    {
+      // Campo com vários valores: o indicador passa se tiver o vínculo escolhido.
+      field: "griConnection",
+      label: "Conexão GRI",
+      allLabel: "Com e sem vínculo GRI",
+      ariaLabel: "Filtrar por conexão com as Normas GRI",
+      onlyWithGri: true,
+      options: [
+        { value: "com", label: "Com vínculo GRI" },
+        { value: "atende", label: "Atende a divulgação" },
+        { value: "apoia", label: "Apoia a divulgação" },
+        { value: "contexto", label: "Contexto (benchmark)" },
+        { value: "sem", label: "Sem vínculo GRI" },
+      ],
+    },
   ],
 
   /**

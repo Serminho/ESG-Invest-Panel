@@ -18,7 +18,7 @@ export class DashboardController {
    * @param {ReturnType<typeof import("../main.js").queryDom>} deps.dom
    * @param {import("../state/Store.js").Store} deps.store
    * @param {(catalog: object) => Map<string, object>} deps.createViews
-   * @param {{ field: string, allLabel: string, ariaLabel: string }[]} deps.filterFields
+   * @param {{ field: string, label?: string, allLabel: string, ariaLabel: string, options?: { value: string, label: string }[], onlyWithGri?: boolean }[]} deps.filterFields
    * @param {(file: File) => void} deps.onFileSelected
    * @param {{ windowYears: number }} [deps.periodFilter] janela do filtro De / Até
    * @param {number} [deps.currentYear] ano de referência da janela (padrão: ano atual)
@@ -56,9 +56,17 @@ export class DashboardController {
   }
 
   #bindEvents() {
-    const { nav, filterSelects, search, clearFilters, fileInput } = this.dom;
+    const { nav, filterSelects, search, clearFilters, fileInput, filtersToggle, filtersPanel } = this.dom;
 
-    // A página ativa fica no endereço (#T8, #gri…): dá para compartilhar o link e usar o botão Voltar.
+    // Painel "Filtros": abre e fecha os seletores, que ficam fora da tela quando não estão em uso.
+    filtersToggle.addEventListener("click", () => this.#setFiltersOpen(filtersPanel.hidden));
+    filtersPanel.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      this.#setFiltersOpen(false);
+      filtersToggle.focus();
+    });
+
+    // A página ativa fica no endereço (#T8, #catalog…): dá para compartilhar o link e usar o botão Voltar.
     nav.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-view]");
       if (!button) return;
@@ -112,6 +120,22 @@ export class DashboardController {
     this.store.update({ yearFrom: from.value, yearTo: to.value });
   }
 
+  #setFiltersOpen(open) {
+    this.dom.filtersPanel.hidden = !open;
+    this.dom.filtersToggle.setAttribute("aria-expanded", String(open));
+    this.dom.filtersToggle.classList.toggle("open", open);
+  }
+
+  /** Quantos filtros do painel estão ativos (o período conta como um). */
+  #renderActiveCount() {
+    const { criteria, yearFrom, yearTo } = this.store.state;
+    const count = Object.values(criteria).filter(Boolean).length + (yearFrom || yearTo ? 1 : 0);
+    const { filtersCount, filtersToggle } = this.dom;
+    filtersCount.hidden = count === 0;
+    filtersCount.textContent = String(count);
+    filtersToggle.setAttribute("aria-label", count ? `Filtros (${count} ativo${count > 1 ? "s" : ""})` : "Filtros");
+  }
+
   #viewFromHash() {
     let id = "";
     try {
@@ -142,31 +166,38 @@ export class DashboardController {
   }
 
   /**
-   * Período (De / Até, últimos anos) e um select por filtro; filtros sem nenhum
-   * valor na planilha (ex.: sem aba GRI) não aparecem.
+   * Painel de filtros: período (De / Até, últimos anos) e um select por filtro,
+   * cada um com rótulo. Filtros sem nenhum valor na planilha não aparecem.
    */
   #renderFilterSelects() {
     const fields = this.filterFields
-      .map((spec) => ({ ...spec, values: this.#catalog.distinctValues(spec.field) }))
-      .filter(({ values }) => values.length > 0);
+      .filter((spec) => !spec.onlyWithGri || this.#catalog.hasGri)
+      .map((spec) => ({ ...spec, options: filterOptions(spec, this.#catalog.distinctValues(spec.field)) }))
+      .filter(({ options }) => options.length > 0);
     const years = this.periodYears;
     this.dom.filterSelects.innerHTML = render(html`
-      <span class="period-filter" role="group" aria-label="Período"
+      <div class="filter-field" role="group" aria-labelledby="filter-label-period"
         title="Mostra indicadores com algum ano no intervalo. Os internos propostos, ainda sem período, saem quando há limite.">
-        <select class="filter-control" data-period="from" aria-label="Período: ano inicial">
-          <option value="">De: qualquer ano</option>
-          ${years.map((year) => html`<option value="${year}">De ${year}</option>`)}
+        <span class="filter-label" id="filter-label-period">Período</span>
+        <span class="period-filter">
+          <select class="filter-control" data-period="from" aria-label="Período: ano inicial">
+            <option value="">De: qualquer ano</option>
+            ${years.map((year) => html`<option value="${year}">De ${year}</option>`)}
+          </select>
+          <select class="filter-control" data-period="to" aria-label="Período: ano final">
+            <option value="">Até: qualquer ano</option>
+            ${[...years].reverse().map((year) => html`<option value="${year}">Até ${year}</option>`)}
+          </select>
+        </span>
+      </div>
+      ${fields.map(({ field, label, allLabel, ariaLabel, options }) => html`
+      <label class="filter-field">
+        <span class="filter-label">${label ?? ariaLabel}</span>
+        <select class="filter-control" data-field="${field}" aria-label="${ariaLabel}">
+          <option value="">${allLabel}</option>
+          ${options.map((option) => html`<option value="${option.value}">${option.label}</option>`)}
         </select>
-        <select class="filter-control" data-period="to" aria-label="Período: ano final">
-          <option value="">Até: qualquer ano</option>
-          ${[...years].reverse().map((year) => html`<option value="${year}">Até ${year}</option>`)}
-        </select>
-      </span>
-      ${fields.map(({ field, allLabel, ariaLabel, values }) => html`
-      <select class="filter-control" data-field="${field}" aria-label="${ariaLabel}">
-        <option value="">${allLabel}</option>
-        ${values.map((value) => html`<option value="${value}">${value}</option>`)}
-      </select>`)}`);
+      </label>`)}`);
     this.dom.search.value = "";
   }
 
@@ -179,6 +210,7 @@ export class DashboardController {
     });
 
     this.dom.page.innerHTML = render(view.render(this.#catalog, filter));
+    this.#renderActiveCount();
     this.dom.nav.querySelectorAll("button").forEach((button) => {
       const active = button.dataset.view === view.id;
       button.classList.toggle("active", active);
@@ -195,6 +227,15 @@ export function initialState(filterFields) {
     yearFrom: "",
     yearTo: "",
   };
+}
+
+/**
+ * Opções de um filtro: a lista fixa de `spec.options` (só as que têm indicador)
+ * ou, sem ela, os valores da planilha.
+ */
+export function filterOptions(spec, values) {
+  if (!spec.options) return values.map((value) => ({ value, label: value }));
+  return spec.options.filter((option) => values.includes(option.value));
 }
 
 /** Anos da janela do filtro de período, do mais antigo ao atual (ex.: 2017…2026). */

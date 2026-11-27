@@ -39,8 +39,13 @@ export class Indicator {
       [...measurements].sort((a, b) => a.period.id.localeCompare(b.period.id, "pt-BR", { numeric: true })),
     );
     this.griLinks = Object.freeze([...griLinks]);
-    /** Normas GRI ligadas (campo de vários valores usado no filtro). */
-    this.griStandards = Object.freeze([...new Set(this.griLinks.map(({ disclosure }) => disclosure.standard || disclosure.label))]);
+    /**
+     * Conexão GRI (campo de vários valores usado no filtro): "com" + o tipo de cada
+     * vínculo (atende, apoia, contexto…) ou só "sem" quando não há vínculo.
+     */
+    this.griConnection = Object.freeze(this.griLinks.length
+      ? ["com", ...new Set(this.griLinks.map(({ type }) => type.key))]
+      : ["sem"]);
     this.searchText = [
       this.id, this.name, theme.label, this.origin, this.purpose, this.definition, this.unit, this.status,
       this.limit, this.pillar, this.periodicity, universe?.name, source?.title, source?.institution,
