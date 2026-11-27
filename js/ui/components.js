@@ -103,10 +103,40 @@ function sourceDetail(indicator) {
 const measurementLine = (indicator, m) =>
   join(m.period.label, formatValue(m.value, m.unit || indicator.unit), m.geography, m.kind, m.method, m.note);
 
+/** Código GRI com a cor do tipo de vínculo; o título completo fica no tooltip. */
+const griBadge = (link) => html`
+  <span class="gri-badge gri-${link.type.key}" title="${join(link.disclosure.title, link.type.label)}">${link.disclosure.label}</span>`;
+
+/** Rótulo do tipo de vínculo (Atende, Apoia, Contexto). */
+export const griTypePill = (type) => html`<span class="gri-badge gri-${type.key}">${type.label}</span>`;
+
+/** Legenda dos tipos de vínculo. */
+export const griLegend = (types) => html`
+  <div class="gri-legend">${types.map((type) => html`
+    <span><i class="gri-swatch gri-${type.key}"></i><strong>${type.label}</strong> ${type.description}</span>`)}
+  </div>`;
+
+const disclosureTitle = (disclosure) => (disclosure.safeUrl
+  ? html`<a class="source-link" href="${disclosure.safeUrl}" target="_blank" rel="noopener">${disclosure.label}</a>`
+  : disclosure.label);
+
+const griDetail = (indicator) => html`
+  <div class="detail-wide">
+    <div class="detail-label">Normas GRI</div>
+    <ul class="gri-detail">${indicator.griLinks.map((link) => html`
+      <li>
+        ${griTypePill(link.type)}
+        <div><strong>${disclosureTitle(link.disclosure)}</strong> ${link.disclosure.title && `· ${link.disclosure.title}`}
+          ${link.note && html`<small>${link.note}</small>`}</div>
+      </li>`)}
+    </ul>
+  </div>`;
+
 const recordItem = (indicator) => html`
   <details class="record">
     <summary>
-      <span class="record-name">${indicator.id} · ${indicator.name}</span>
+      <span class="record-name">${indicator.id} · ${indicator.name}${indicator.griLinks.length > 0 && html`
+        <span class="gri-badges">${indicator.griLinks.map(griBadge)}</span>`}</span>
       <span class="record-value">${formatIndicatorValue(indicator)}</span>
       <span class="record-period">${valueContext(indicator)}</span>
       <span class="record-toggle">＋</span>
@@ -119,6 +149,7 @@ const recordItem = (indicator) => html`
       ${detail("Classificação", join(indicator.origin, indicator.status, indicator.pillar && `Pilar ${indicator.pillar}`, indicator.periodicity))}
       ${detail("Fonte e localizador", sourceDetail(indicator))}
       ${indicator.measurements.length > 0 && detail("Observações", indicator.measurements.map((m) => measurementLine(indicator, m)).join(" | "))}
+      ${indicator.griLinks.length > 0 && griDetail(indicator)}
     </div>
   </details>`;
 

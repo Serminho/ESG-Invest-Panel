@@ -106,3 +106,55 @@ test("filtro combina busca, período, atuação e tema", () => {
   assert.deepEqual(ids(catalog.search(new IndicatorFilter().withTheme("T8"))), ["T8-01", "T8-10"]);
   assert.deepEqual(catalog.distinctValues("year"), ["2025"]);
 });
+
+const griSheets = () => ({
+  ...sheets(),
+  Dim_GRI: [
+    { "Codigo_GRI": "404-1", "Norma": "GRI 404: Capacitação e Educação 2016", "Grupo": "Social", "Divulgação": "Média de horas de capacitação", "Vigência": "Em vigor.", "URL pública": "https://example.org/gri-404" },
+    { "Codigo_GRI": "203-2", "Norma": "GRI 203: Impactos Econômicos Indiretos 2016", "Grupo": "Econômico", "Divulgação": "Impactos econômicos indiretos significativos", "Vigência": "", "URL pública": "javascript:alert(1)" },
+    { "Codigo_GRI": "418-1", "Norma": "GRI 418: Privacidade do Cliente 2016", "Grupo": "Social", "Divulgação": "Queixas comprovadas", "Vigência": "", "URL pública": "" },
+  ],
+  Ponte_Indicador_GRI: [
+    { "ID_Indicador": "T8-01", "Codigo_GRI": "203-2", "Tipo_Vinculo": "Contexto", "Justificativa": "Mercado formal." },
+    { "ID_Indicador": "T9-21", "Codigo_GRI": "203-2", "Tipo_Vinculo": "apoia", "Justificativa": "" },
+    { "ID_Indicador": "T9-21", "Codigo_GRI": "404-1", "Tipo_Vinculo": "Atende", "Justificativa": "Mesma métrica." },
+    { "ID_Indicador": "T9-21", "Codigo_GRI": "404-1", "Tipo_Vinculo": "Atende", "Justificativa": "Linha repetida." },
+    { "ID_Indicador": "T12-01", "Codigo_GRI": "999-9", "Tipo_Vinculo": "Parcial", "Justificativa": "Código sem cadastro." },
+    { "ID_Indicador": "T8-10", "Codigo_GRI": null, "Tipo_Vinculo": "Atende", "Justificativa": "Sem código: ignorada." },
+    { "ID_Indicador": "X-99", "Codigo_GRI": "418-1", "Tipo_Vinculo": "Atende", "Justificativa": "Indicador inexistente." },
+  ],
+});
+
+test("GRI: liga indicadores às divulgações, do vínculo mais forte ao mais fraco", () => {
+  const catalog = buildCatalog(fakeWorkbook(griSheets()), CONFIG);
+  const byId = (id) => catalog.indicators.find((i) => i.id === id);
+  const innovation = byId("T9-21");
+  assert.deepEqual(innovation.griLinks.map((l) => [l.disclosure.id, l.type.key]), [["404-1", "atende"], ["203-2", "apoia"]]);
+  assert.equal(innovation.griLinks[0].note, "Mesma métrica.", "linha repetida não duplica o vínculo");
+  assert.equal(byId("T8-01").griLinks[0].type.label, "Contexto");
+  assert.deepEqual(byId("T8-10").griLinks, [], "linha sem código é ignorada");
+  assert.equal(catalog.griLinkedCount, 3);
+});
+
+test("GRI: código sem cadastro aparece só com o código; divulgação sem indicador fica de fora", () => {
+  const catalog = buildCatalog(fakeWorkbook(griSheets()), CONFIG);
+  const [link] = catalog.indicators.find((i) => i.id === "T12-01").griLinks;
+  assert.deepEqual([link.disclosure.label, link.disclosure.title, link.type.key, link.type.label], ["GRI 999-9", "", "outro", "Parcial"]);
+  assert.deepEqual(ids(catalog.griDisclosures), ["404-1", "203-2", "999-9"], "418-1 só tinha indicador inexistente");
+  assert.equal(catalog.griDisclosures[0].safeUrl, "https://example.org/gri-404");
+  assert.equal(catalog.griDisclosures[1].safeUrl, "", "URL que não é http(s) não vira link");
+});
+
+test("GRI: filtro por norma, busca por código e planilha sem as abas", () => {
+  const catalog = buildCatalog(fakeWorkbook(griSheets()), CONFIG);
+  const search = (options) => ids(catalog.search(new IndicatorFilter(options)));
+  assert.deepEqual(search({ criteria: { griStandards: "GRI 203: Impactos Econômicos Indiretos 2016" } }), ["T8-01", "T9-21"]);
+  assert.deepEqual(search({ query: "404-1" }), ["T9-21"]);
+  assert.deepEqual(catalog.distinctValues("griStandards"),
+    ["GRI 203: Impactos Econômicos Indiretos 2016", "GRI 404: Capacitação e Educação 2016", "GRI 999-9"]);
+
+  const plain = buildCatalog(fakeWorkbook(sheets()), CONFIG);
+  assert.equal(plain.hasGri, false);
+  assert.deepEqual(plain.distinctValues("griStandards"), []);
+  assert.deepEqual(plain.indicators[0].griLinks, []);
+});

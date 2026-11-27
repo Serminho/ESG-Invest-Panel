@@ -29,6 +29,8 @@ export const CONFIG = Object.freeze({
     { field: "year", allLabel: "Todos os períodos", ariaLabel: "Filtrar por período" },
     { field: "origin", allLabel: "Externos e internos", ariaLabel: "Filtrar por atuação" },
     { field: "status", allLabel: "Todas as classificações", ariaLabel: "Filtrar por classificação do dado" },
+    // Campo com vários valores: o indicador passa se tiver vínculo com a norma escolhida.
+    { field: "griStandards", allLabel: "Todas as normas GRI", ariaLabel: "Filtrar por norma GRI" },
   ],
 
   /**
@@ -117,6 +119,27 @@ export const CONFIG = Object.freeze({
       name: "Leitura_Analitica",
       required: false,
       columns: { id: "Tema", reading: "Leitura dos dados públicos", caution: "Aplicação e cautela" },
+    },
+    /** Catálogo de divulgações GRI usadas pelos indicadores. */
+    gri: {
+      name: "Dim_GRI",
+      required: false,
+      columns: {
+        id: "Codigo_GRI",
+        standard: "Norma",
+        group: "Grupo",
+        title: "Divulgação",
+        status: "Vigência",
+        url: "URL pública",
+      },
+      optional: ["status", "url"],
+    },
+    /** Ponte N:N indicador -> divulgação GRI. `id` é o ID_Indicador da linha. */
+    griLinks: {
+      name: "Ponte_Indicador_GRI",
+      required: false,
+      columns: { id: "ID_Indicador", code: "Codigo_GRI", type: "Tipo_Vinculo", note: "Justificativa" },
+      optional: ["note"],
     },
   },
 });

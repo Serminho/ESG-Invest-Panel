@@ -16,7 +16,12 @@ export class IndicatorFilter {
 
   matches(indicator) {
     if (this.themeId && indicator.themeId !== this.themeId) return false;
-    const criteriaOk = Object.entries(this.criteria).every(([field, value]) => !value || indicator[field] === value);
+    const criteriaOk = Object.entries(this.criteria).every(([field, value]) => !value || hasValue(indicator[field], value));
     return criteriaOk && (!this.query || indicator.searchText.includes(this.query));
   }
+}
+
+/** Campos simples comparam igualdade; campos com lista (ex.: normas GRI) exigem o valor na lista. */
+function hasValue(actual, expected) {
+  return Array.isArray(actual) ? actual.includes(expected) : actual === expected;
 }

@@ -858,3 +858,256 @@ a:hover {
     display: none !important;
   }
 }
+
+/* =========================================================
+   Conexão GRI (selos, legenda, cobertura e índice)
+   Cada tipo de vínculo define três cores: --gri (cheia), --gri-soft (fundo) e --gri-ink (texto).
+   ========================================================= */
+.gri-atende {
+  --gri: #13a79a;
+  --gri-soft: #dff3f0;
+  --gri-ink: #0d665e;
+}
+.gri-apoia {
+  --gri: #5d82b8;
+  --gri-soft: #e4ecf7;
+  --gri-ink: #2b4f80;
+}
+.gri-contexto {
+  --gri: #b3bfca;
+  --gri-soft: #eef1f4;
+  --gri-ink: #536577;
+}
+.gri-sem,
+.gri-outro {
+  --gri: #e3e8ec;
+  --gri-soft: #f6f8f9;
+  --gri-ink: #7a8996;
+}
+.gri-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.gri-badge,
+.gri-chip {
+  display: inline-flex;
+  align-items: center;
+  background: var(--gri-soft);
+  color: var(--gri-ink);
+  border: 1px solid color-mix(in srgb, var(--gri) 55%, transparent);
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.2;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+.gri-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  font-size: 12px;
+  color: var(--muted);
+  margin: -4px 0 6px;
+}
+.gri-legend strong {
+  color: var(--ink);
+}
+.gri-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--gri);
+  margin-right: 6px;
+  vertical-align: -1px;
+}
+.detail-wide {
+  grid-column: 1 / -1;
+}
+.gri-detail,
+.gri-notes ul {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+.gri-detail li,
+.gri-notes li {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  font-size: 12px;
+  color: #3c5569;
+}
+.gri-detail li > .gri-badge,
+.gri-notes li > .gri-badge {
+  justify-content: center;
+}
+.gri-detail small,
+.gri-notes small {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  margin-top: 2px;
+}
+.gri-coverage {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+/* Com a página Conexão GRI a navegação ganhou mais um botão: no desktop ela quebra linha
+   em vez de esconder abas numa rolagem horizontal; no celular continua rolando. */
+.nav {
+  flex-wrap: wrap;
+}
+/* Opções longas (normas GRI) não podem empurrar o select para fora da tela. */
+#filterSelects {
+  max-width: 100%;
+  min-width: 0;
+}
+.filters select.filter-control {
+  max-width: 100%;
+}
+.gri-coverage-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.1fr) minmax(140px, 2fr) 48px;
+  gap: 10px;
+  align-items: center;
+}
+.gri-stack {
+  display: flex;
+  height: 20px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: #e9eff2;
+}
+.gri-stack > span {
+  flex-basis: 0;
+  min-width: 18px;
+  background: var(--gri);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gri-stack > .gri-contexto,
+.gri-stack > .gri-sem {
+  color: var(--gri-ink);
+}
+.gri-index {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+  column-gap: 32px;
+}
+.gri-row {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid #edf1f4;
+}
+.gri-code {
+  font-weight: 820;
+  font-size: 13px;
+  color: var(--navy);
+}
+.gri-code a {
+  color: inherit;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+}
+.gri-main > strong {
+  display: block;
+  font-size: 13px;
+  color: #244258;
+}
+.gri-main > small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.gri-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.gri-chip {
+  font-size: 11px;
+  cursor: default;
+}
+.gri-notes {
+  margin-top: 8px;
+}
+.gri-notes summary {
+  font-size: 11px;
+  font-weight: 750;
+  color: var(--blue);
+  cursor: pointer;
+  width: fit-content;
+}
+@media (max-width: 560px) {
+  .nav {
+    flex-wrap: nowrap;
+  }
+  .gri-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .gri-coverage-row {
+    grid-template-columns: 1fr 44px;
+  }
+  .gri-coverage-row .bar-label {
+    grid-column: 1 / -1;
+  }
+}
+/* Só na tela: na impressão as cores claras valem mesmo com o modo escuro ligado. */
+@media screen {
+  [data-theme="dark"] .gri-atende {
+    --gri: #23b8a9;
+    --gri-soft: #10363a;
+    --gri-ink: #8fe3d8;
+  }
+  [data-theme="dark"] .gri-apoia {
+    --gri: #6f95cc;
+    --gri-soft: #18304d;
+    --gri-ink: #a9c6ee;
+  }
+  [data-theme="dark"] .gri-contexto {
+    --gri: #56697c;
+    --gri-soft: #1b2b3c;
+    --gri-ink: #b4c4d3;
+  }
+  [data-theme="dark"] .gri-sem,
+  [data-theme="dark"] .gri-outro {
+    --gri: #2a3d52;
+    --gri-soft: #16263a;
+    --gri-ink: #98aec2;
+  }
+  [data-theme="dark"] .gri-stack {
+    background: #1d3044;
+  }
+  [data-theme="dark"] .gri-row {
+    border-top-color: var(--line);
+  }
+  [data-theme="dark"] .gri-main > strong,
+  [data-theme="dark"] .gri-detail li,
+  [data-theme="dark"] .gri-notes li {
+    color: #cfdeeb;
+  }
+}
+@media print {
+  .gri-notes:not([open]) {
+    display: none;
+  }
+  .gri-row {
+    break-inside: avoid;
+  }
+}

@@ -40,8 +40,10 @@ Usa o executor nativo do Node (`node --test`), sem dependências. Os testes usam
 | `Dim_Universo` | Universo ou denominador da pesquisa, com definição e limite | Não |
 | `Dim_Fonte` | Documento, instituição, localizador e link público | Não |
 | `Leitura_Analitica` | Leituras e cautelas exibidas no topo de cada tema | Não |
+| `Dim_GRI` | Divulgações GRI usadas (código, norma, grupo, título, vigência e link) | Não |
+| `Ponte_Indicador_GRI` | Vínculos indicador ↔ divulgação GRI, com tipo e justificativa | Não |
 
-As abas são ligadas pelos IDs (`ID_Tema`, `ID_Indicador`, `ID_Periodo`, `ID_Geografia`, `ID_Universo`, `ID_Fonte`), como descrito na aba `Relacionamentos`.
+As abas são ligadas pelos IDs (`ID_Tema`, `ID_Indicador`, `ID_Periodo`, `ID_Geografia`, `ID_Universo`, `ID_Fonte`, `Codigo_GRI`), como descrito na aba `Relacionamentos`.
 
 O cabeçalho de cada aba é procurado nas 10 primeiras linhas. Por isso a `Fato_Indicador` pode ter títulos acima do cabeçalho.
 
@@ -63,6 +65,31 @@ O cabeçalho de cada aba é procurado nas 10 primeiras linhas. Por isso a `Fato_
 
 Para usar um universo ou uma fonte novos, cadastre-os antes em `Dim_Universo` ou `Dim_Fonte`. Sem cadastro, o indicador é exibido sem universo ou fonte.
 
+### Conexão com as Normas GRI
+
+Cada indicador pode se ligar a uma ou mais divulgações GRI (ex.: `404-1`) ou tópicos da norma setorial GRI 13 (ex.: `13.22`). A ligação fica na `Ponte_Indicador_GRI`, uma linha por par indicador + divulgação:
+
+| Coluna | Conteúdo |
+|---|---|
+| `ID_Indicador` | Código da `Dim_Indicador` |
+| `Codigo_GRI` | Código cadastrado na `Dim_GRI` |
+| `Tipo_Vinculo` | `Atende`, `Apoia` ou `Contexto` (veja abaixo) |
+| `Justificativa` | Por que o indicador se liga à divulgação e o que falta para atendê-la |
+
+- **Atende:** o indicador calcula a mesma métrica da divulgação. Ainda assim, confira as desagregações que a GRI exige (ex.: a 404-1 pede gênero e categoria funcional).
+- **Apoia:** o indicador contribui para a divulgação, mas não a cumpre sozinho.
+- **Contexto:** benchmark público sobre o tema. Serve para situar o assunto; **não** é desempenho da Investe e não entra no relato como dado próprio.
+
+Para ligar um indicador novo, acrescente uma linha na ponte. Se a divulgação ainda não existir, cadastre-a antes na `Dim_GRI`; um código sem cadastro aparece no painel só com o número. Linhas repetidas valem uma vez (a primeira).
+
+A coluna `Vigência` da `Dim_GRI` registra transições já publicadas pela GRI. As principais para este painel:
+
+- **GRI 102: Mudança do Clima 2025** e **GRI 103: Energia 2025** valem para relatos publicados a partir de 1º/1/2027 e substituem a GRI 305 e a GRI 302. Por isso o mapeamento já usa 102-x e 103-x. A GRI 102 exclui emissões evitadas dos inventários e das metas: o T9-23 aparece como *Apoia* ao plano de transição (102-1), não como redução de emissões.
+- **GRI 101: Biodiversidade 2024** está em vigor desde 1º/1/2026 e substitui a GRI 304.
+- As normas trabalhistas (202, 401, 404, 405) estão em revisão. A GRI 104 (Emprego) e a GRI 105 (Remuneração e Jornada) foram aprovadas em 2026, com vigência ainda a definir. Revise esses vínculos quando a data sair.
+
+Oito indicadores não têm correspondência GRI (tecnologias digitais, automação, prazo de aprovação, ROI). Se o tema for material, a gestão dele é relatada pela GRI 3-3 e o indicador vira métrica própria.
+
 ### Mudar o formato da planilha
 
 Tudo que depende do formato fica em `js/config.js`:
@@ -70,7 +97,7 @@ Tudo que depende do formato fica em `js/config.js`:
 - `dataFile`: caminho da planilha, relativo ao `index.html`.
 - `themesInScope`: temas exibidos. `null` mostra todos; ex.: `["T8", "T12"]`.
 - `sheets`: nome de cada aba e o cabeçalho de cada coluna. Se renomear uma coluna na planilha, ajuste aqui.
-- `filters`: campos dos filtros de seleção (`year`, `origin`, `status`) e seus textos.
+- `filters`: campos dos filtros de seleção (`year`, `origin`, `status`, `griStandards`) e seus textos. Um filtro sem nenhum valor na planilha não aparece.
 - `internalOriginPrefix`: início da coluna `Atuação` que marca um indicador interno.
 - `themeAccents` e `fallbackAccents`: cores de cada tema.
 - `highlightsPerTheme`: quantos indicadores aparecem em destaque por tema na visão geral.
@@ -81,16 +108,20 @@ Se faltar uma aba obrigatória ou uma coluna, o painel mostra qual está faltand
 
 - **Visão geral:** números do catálogo, destaques por tema e a lista completa filtrada.
 - **Uma página por tema (T8, T9, T12):** leituras do tema no topo, indicadores agrupados por universo de pesquisa (externos) ou por pilar (internos), e a lista de catálogo.
+- **Conexão GRI** (aparece quando a planilha tem a `Dim_GRI`): cobertura por tema, índice das divulgações GRI por grupo (Universal, Econômico, Ambiental, Social, Setorial) com os indicadores ligados e as justificativas, e a lista de indicadores sem correspondência.
 - **Catálogo completo:** lista detalhada de todos os indicadores filtrados.
 
-Cada indicador tem um detalhe expansível com propósito, definição, universo, limite de interpretação, classificação, fonte com link e observações.
+Cada indicador tem um detalhe expansível com propósito, definição, universo, limite de interpretação, classificação, fonte com link, observações e normas GRI. Os códigos GRI também aparecem como selos abaixo do nome, coloridos pelo tipo de vínculo.
+
+A página ativa fica no endereço (`#overview`, `#T8`, `#gri`, `#catalog`…), então dá para compartilhar o link de uma página e usar o botão Voltar do navegador.
 
 ## Filtros
 
 - **Período:** ano da observação mais recente do indicador ou, na falta dela, do período de referência cadastrado em `Dim_Indicador`.
 - **Atuação:** a origem exata de cada indicador (ex.: "Externo — benchmark público" ou "Interno — indicador fictício proposto").
 - **Classificação do dado:** valores da coluna `Classificação do dado`.
-- **Busca:** texto livre em código, nome, tema, atuação, propósito, definição, unidade, limite, pilar, periodicidade, universo, fonte, instituição e nas observações (período e geografia).
+- **Norma GRI:** indicadores com vínculo à norma escolhida (ex.: "GRI 404: Capacitação e Educação 2016"). Na página Conexão GRI, o índice mostra só as divulgações dessa norma.
+- **Busca:** texto livre em código, nome, tema, atuação, propósito, definição, unidade, limite, pilar, periodicidade, universo, fonte, instituição, observações (período e geografia) e normas GRI (código, título e tipo de vínculo; ex.: "404-1").
 
 ## Arquitetura
 
@@ -110,11 +141,14 @@ js/
     Indicator.js              indicador, com tema, universo, fonte, observações e busca
     Measurement.js            observação (valor, período, geografia, método)
     Theme.js                  tema com leituras analíticas
+    Gri.js                    divulgação GRI, vínculo e tipos de vínculo
     references.js             período, geografia, universo e fonte
     IndicatorCatalog.js       repositório em memória (busca, agrupamentos, contagens)
     IndicatorFilter.js        critérios de filtro imutáveis
   state/Store.js              estado observável (página, busca, filtros)
   ui/
+    ThemeToggle.js            modo claro/escuro
+    UiEnhancements.js         expandir detalhes, atalhos e voltar ao topo
     html.js                   template `html` com escape automático (evita XSS)
     format.js                 formatação pt-BR de valores e unidades
     components.js             componentes visuais puros
@@ -122,18 +156,19 @@ js/
     views/
       OverviewView.js         visão geral
       ThemeView.js            uma página por tema
+      GriView.js              Conexão GRI
       CatalogView.js          catálogo completo
       index.js                registra as páginas
 tests/
-  catalog.test.js             montagem do catálogo, ligações e filtros
-  ui.test.js                  escape, formatação, parse e destaques
+  catalog.test.js             montagem do catálogo, ligações, filtros e GRI
+  ui.test.js                  escape, formatação, parse, destaques e página GRI
   fakeWorkbook.js             planilha falsa usada pelos testes
 ```
 
 Princípios aplicados:
 
 - **Responsabilidade única:** leitura do arquivo, montagem do domínio, estado e apresentação ficam em módulos separados.
-- **Aberto/fechado:** temas, indicadores, universos e fontes vêm da planilha. Uma página nova é uma classe nova, registrada em `ui/views/index.js`.
+- **Aberto/fechado:** temas, indicadores, universos, fontes e vínculos GRI vêm da planilha. Uma página nova é uma classe nova, registrada em `ui/views/index.js`.
 - **Inversão de dependência:** a biblioteca SheetJS é injetada em `XlsxWorkbookSource`. O `CatalogBuilder` só conhece a interface `hasSheet`/`matrix`, então os testes usam uma planilha falsa.
 - **Sem estado global mutável:** o estado fica no `Store`, e as entidades do domínio são imutáveis (`Object.freeze`).
 - **Segurança:** todo texto da planilha é escapado. Links só são criados para `http`/`https`.

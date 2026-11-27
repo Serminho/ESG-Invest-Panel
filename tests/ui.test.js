@@ -43,3 +43,33 @@ test("destaques: com valor primeiro, na ordem de código", () => {
   const result = pickHighlights([item("a", false), item("b", true), item("c", false), item("d", true)], 3);
   assert.deepEqual(result.map((i) => i.id), ["b", "d", "a"]);
 });
+
+test("página Conexão GRI: cobertura, índice e lacunas respeitam o filtro", async () => {
+  const { CONFIG } = await import("../js/config.js");
+  const { buildCatalog } = await import("../js/data/CatalogBuilder.js");
+  const { IndicatorFilter } = await import("../js/domain/IndicatorFilter.js");
+  const { GriView } = await import("../js/ui/views/GriView.js");
+  const { createViews } = await import("../js/ui/views/index.js");
+  const { fakeWorkbook, indicatorRow } = await import("./fakeWorkbook.js");
+
+  const workbook = fakeWorkbook({
+    Dim_Indicador: [indicatorRow(), indicatorRow({ "ID_Indicador": "T8-02", "Indicador": "Sem GRI <b>" })],
+    Dim_GRI: [{ "Codigo_GRI": "203-2", "Norma": "GRI 203", "Grupo": "Econômico", "Divulgação": "Impactos <indiretos>" }],
+    Ponte_Indicador_GRI: [{ "ID_Indicador": "T8-01", "Codigo_GRI": "203-2", "Tipo_Vinculo": "Contexto" }],
+  });
+  const catalog = buildCatalog(workbook, CONFIG);
+  assert.ok(createViews(catalog, CONFIG).has("gri"));
+
+  const page = render(new GriView().render(catalog, new IndicatorFilter()));
+  assert.match(page, /1 de 2 indicadores com vínculo/);
+  assert.match(page, /Impactos &lt;indiretos&gt;/, "texto da planilha é escapado");
+  assert.match(page, /gri-chip gri-contexto[^>]*>T8-01</);
+  assert.match(page, /Indicadores sem correspondência GRI/);
+  assert.match(page, /Sem GRI &lt;b&gt;/);
+
+  const filtered = render(new GriView().render(catalog, new IndicatorFilter({ query: "T8-02" })));
+  assert.doesNotMatch(filtered, /Índice de divulgações/);
+
+  const noGri = buildCatalog(fakeWorkbook({ Dim_Indicador: [indicatorRow()] }), CONFIG);
+  assert.equal(createViews(noGri, CONFIG).has("gri"), false, "sem Dim_GRI a página não aparece");
+});

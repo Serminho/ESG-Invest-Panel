@@ -38,7 +38,7 @@ export class DashboardController {
     this.#renderHeader();
     this.#renderNav();
     this.#renderFilterSelects();
-    this.store.update(initialState(this.filterFields));
+    this.store.update({ ...initialState(this.filterFields), view: this.#viewFromHash() });
   }
 
   showMessage(message) {
@@ -55,11 +55,18 @@ export class DashboardController {
   #bindEvents() {
     const { nav, filterSelects, search, clearFilters, fileInput } = this.dom;
 
+    // A página ativa fica no endereço (#T8, #gri…): dá para compartilhar o link e usar o botão Voltar.
     nav.addEventListener("click", (event) => {
       const button = event.target.closest("button[data-view]");
       if (!button) return;
+      window.location.hash = button.dataset.view;
       this.store.update({ view: button.dataset.view });
       window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    window.addEventListener("hashchange", () => {
+      const view = this.#viewFromHash();
+      if (view !== this.store.state.view) this.store.update({ view });
     });
 
     filterSelects.addEventListener("change", (event) => {
@@ -83,6 +90,16 @@ export class DashboardController {
     });
   }
 
+  #viewFromHash() {
+    let id = "";
+    try {
+      id = decodeURIComponent(window.location.hash.slice(1));
+    } catch {
+      // Endereço malformado (ex.: "#%E0"): cai na página padrão.
+    }
+    return this.#views.has(id) ? id : DEFAULT_VIEW;
+  }
+
   #renderHeader() {
     const catalog = this.#catalog;
     this.dom.themeSummary.textContent = catalog.themes.map((theme) => theme.label).join(" | ");
@@ -91,6 +108,7 @@ export class DashboardController {
       <span class="pill">${pluralize(catalog.indicators.length, "indicador", "indicadores")}</span>
       <span class="pill">${pluralize(catalog.measuredCount, "com valor", "com valor")}</span>
       <span class="pill">${pluralize(catalog.internalCount, "interno proposto", "internos propostos")}</span>
+      ${catalog.hasGri && html`<span class="pill">${catalog.griLinkedCount} com vínculo GRI</span>`}
       <span class="pill">${pluralize(catalog.sourceCount, "fonte", "fontes")}</span>`);
     this.dom.sourceName.textContent = catalog.sourceName;
   }
@@ -101,11 +119,15 @@ export class DashboardController {
     );
   }
 
+  /** Um select por filtro; filtros sem nenhum valor na planilha (ex.: sem aba GRI) não aparecem. */
   #renderFilterSelects() {
-    this.dom.filterSelects.innerHTML = render(this.filterFields.map(({ field, allLabel, ariaLabel }) => html`
+    const fields = this.filterFields
+      .map((spec) => ({ ...spec, values: this.#catalog.distinctValues(spec.field) }))
+      .filter(({ values }) => values.length > 0);
+    this.dom.filterSelects.innerHTML = render(fields.map(({ field, allLabel, ariaLabel, values }) => html`
       <select class="filter-control" data-field="${field}" aria-label="${ariaLabel}">
         <option value="">${allLabel}</option>
-        ${this.#catalog.distinctValues(field).map((value) => html`<option value="${value}">${value}</option>`)}
+        ${values.map((value) => html`<option value="${value}">${value}</option>`)}
       </select>`));
     this.dom.search.value = "";
   }
