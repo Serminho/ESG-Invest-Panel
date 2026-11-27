@@ -24,11 +24,18 @@ export const CONFIG = Object.freeze({
   /** Valores da coluna Atuação que começam com este texto são indicadores internos. */
   internalOriginPrefix: "Interno",
 
+  /**
+   * Filtro de período: dois seletores (De / Até) com os últimos `windowYears` anos,
+   * contados a partir do ano atual. Indicadores sem período saem quando há limite.
+   */
+  periodFilter: { windowYears: 10 },
+
   /** Filtros de seleção; as opções vêm dos valores da planilha. */
   filters: [
-    { field: "year", allLabel: "Todos os períodos", ariaLabel: "Filtrar por período" },
     { field: "origin", allLabel: "Externos e internos", ariaLabel: "Filtrar por atuação" },
     { field: "status", allLabel: "Todas as classificações", ariaLabel: "Filtrar por classificação do dado" },
+    // Campo com vários valores: o indicador passa se tiver vínculo com a norma escolhida.
+    { field: "griStandards", allLabel: "Todas as normas GRI", ariaLabel: "Filtrar por norma GRI" },
   ],
 
   /**
@@ -117,6 +124,27 @@ export const CONFIG = Object.freeze({
       name: "Leitura_Analitica",
       required: false,
       columns: { id: "Tema", reading: "Leitura dos dados públicos", caution: "Aplicação e cautela" },
+    },
+    /** Catálogo de divulgações GRI usadas pelos indicadores. */
+    gri: {
+      name: "Dim_GRI",
+      required: false,
+      columns: {
+        id: "Codigo_GRI",
+        standard: "Norma",
+        group: "Grupo",
+        title: "Divulgação",
+        status: "Vigência",
+        url: "URL pública",
+      },
+      optional: ["status", "url"],
+    },
+    /** Ponte N:N indicador -> divulgação GRI. `id` é o ID_Indicador da linha. */
+    griLinks: {
+      name: "Ponte_Indicador_GRI",
+      required: false,
+      columns: { id: "ID_Indicador", code: "Codigo_GRI", type: "Tipo_Vinculo", note: "Justificativa" },
+      optional: ["note"],
     },
   },
 });

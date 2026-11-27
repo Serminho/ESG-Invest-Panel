@@ -21,3 +21,13 @@ export function toPeriod(value) {
   if (number !== null && Number.isInteger(number)) return String(number);
   return toText(value);
 }
+
+/**
+ * Anos cobertos por um período: "2025" -> { from: 2025, to: 2025 },
+ * "2023–2024" -> { from: 2023, to: 2024 }. Sem ano reconhecível, null.
+ */
+export function toYearRange(value) {
+  const years = (toText(value).match(/\b(1[89]|2\d)\d{2}\b/g) ?? []).map(Number);
+  if (!years.length) return null;
+  return { from: Math.min(...years), to: Math.max(...years) };
+}

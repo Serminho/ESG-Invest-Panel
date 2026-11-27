@@ -52,6 +52,7 @@ function start() {
     store: new Store(initialState(CONFIG.filters)),
     createViews: (catalog) => createViews(catalog, CONFIG),
     filterFields: CONFIG.filters,
+    periodFilter: CONFIG.periodFilter,
     onFileSelected: (file) => load(() => getSource().fromFile(file), file.name),
   });
 

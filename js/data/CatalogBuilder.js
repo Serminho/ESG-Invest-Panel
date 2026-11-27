@@ -2,6 +2,7 @@ import { readRecords } from "./RecordReader.js";
 import { DataSourceError } from "./DataSourceError.js";
 import { toText } from "./parse.js";
 import { groupBy, IndicatorCatalog } from "../domain/IndicatorCatalog.js";
+import { compareLinks, GriDisclosure, GriLink, unknownDisclosure } from "../domain/Gri.js";
 import { Indicator } from "../domain/Indicator.js";
 import { Measurement } from "../domain/Measurement.js";
 import { Geography, Period, Source, Universe, unknownPeriod } from "../domain/references.js";
@@ -10,7 +11,8 @@ import { Theme } from "../domain/Theme.js";
 /**
  * Monta o catálogo a partir da planilha, seguindo a aba Relacionamentos:
  * Dim_Tema -> Dim_Indicador (ID_Tema), Dim_Indicador -> Fato_Indicador (ID_Indicador),
- * Fato_Indicador -> Dim_Periodo / Dim_Geografia, Dim_Indicador -> Dim_Universo / Dim_Fonte.
+ * Fato_Indicador -> Dim_Periodo / Dim_Geografia, Dim_Indicador -> Dim_Universo / Dim_Fonte,
+ * Dim_Indicador -> Ponte_Indicador_GRI <- Dim_GRI.
  *
  * @param {{ hasSheet(name: string): boolean, matrix(name: string): unknown[][] }} workbook
  * @param {typeof import("../config.js").CONFIG} config
@@ -43,6 +45,7 @@ export function buildCatalog(workbook, config, sourceName = config.dataFile) {
 
   const themes = buildThemes(workbook, indicatorRecords, config);
   const themeById = indexById(themes);
+  const { disclosures, linksByIndicator } = buildGri(workbook, sheets);
 
   const indicators = indicatorRecords.map((record) => new Indicator(record, {
     theme: themeById.get(toText(record.themeId)),
@@ -51,9 +54,41 @@ export function buildCatalog(workbook, config, sourceName = config.dataFile) {
     referencePeriod: toText(record.referencePeriodId) ? periodOf(record.referencePeriodId) : null,
     measurements: measurementsById.get(toText(record.id)) ?? [],
     isInternal: toText(record.origin).startsWith(config.internalOriginPrefix),
+    griLinks: linksByIndicator.get(toText(record.id)) ?? [],
   }));
 
-  return new IndicatorCatalog({ indicators, themes, sourceName });
+  // Só entram no catálogo as divulgações com ao menos um indicador no escopo.
+  const usedCodes = new Set(indicators.flatMap((indicator) => indicator.griLinks.map((link) => link.disclosure.id)));
+  const griDisclosures = disclosures.filter((disclosure) => usedCodes.has(disclosure.id));
+
+  return new IndicatorCatalog({ indicators, themes, griDisclosures, sourceName });
+}
+
+/**
+ * Lê Dim_GRI e Ponte_Indicador_GRI. Códigos da ponte sem cadastro viram
+ * divulgações só com o código, no fim da lista; linhas sem código são ignoradas.
+ */
+function buildGri(workbook, sheets) {
+  const registered = readRecords(workbook, sheets.gri).map((record) => new GriDisclosure(record));
+  const byCode = indexById(registered);
+  const order = new Map(registered.map((disclosure, index) => [disclosure.id, index]));
+
+  const links = readRecords(workbook, sheets.griLinks)
+    .filter((record) => toText(record.code))
+    .map((record) => {
+      const code = toText(record.code);
+      if (!byCode.has(code)) byCode.set(code, unknownDisclosure(code));
+      return { indicatorId: toText(record.id), link: new GriLink(record, byCode.get(code)) };
+    });
+
+  const linksByIndicator = new Map();
+  for (const [indicatorId, group] of groupBy(links, (item) => item.indicatorId)) {
+    // Vínculo repetido (mesmo indicador e código): vale a primeira linha.
+    const unique = group.map(({ link }) => link)
+      .filter((link, index, all) => all.findIndex((other) => other.disclosure.id === link.disclosure.id) === index);
+    linksByIndicator.set(indicatorId, unique.sort(compareLinks(order)));
+  }
+  return { disclosures: [...byCode.values()], linksByIndicator };
 }
 
 /** Um Theme por código usado nos indicadores, na ordem da Dim_Tema, com suas leituras. */

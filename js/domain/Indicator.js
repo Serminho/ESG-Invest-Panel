@@ -1,4 +1,4 @@
-import { toText } from "../data/parse.js";
+import { toText, toYearRange } from "../data/parse.js";
 
 /**
  * Indicador (linha da Dim_Indicador) já ligado a tema, universo, fonte e observações.
@@ -14,8 +14,11 @@ export class Indicator {
    * @param {import("./references.js").Period | null} links.referencePeriod
    * @param {import("./Measurement.js").Measurement[]} links.measurements
    * @param {boolean} links.isInternal
+   * @param {import("./Gri.js").GriLink[]} links.griLinks vínculos GRI, do mais forte ao mais fraco
    */
-  constructor(record, { theme, universe = null, source = null, referencePeriod = null, measurements = [], isInternal = false }) {
+  constructor(record, {
+    theme, universe = null, source = null, referencePeriod = null, measurements = [], isInternal = false, griLinks = [],
+  }) {
     this.id = toText(record.id);
     this.themeId = toText(record.themeId);
     this.name = toText(record.name);
@@ -35,10 +38,14 @@ export class Indicator {
     this.measurements = Object.freeze(
       [...measurements].sort((a, b) => a.period.id.localeCompare(b.period.id, "pt-BR", { numeric: true })),
     );
+    this.griLinks = Object.freeze([...griLinks]);
+    /** Normas GRI ligadas (campo de vários valores usado no filtro). */
+    this.griStandards = Object.freeze([...new Set(this.griLinks.map(({ disclosure }) => disclosure.standard || disclosure.label))]);
     this.searchText = [
       this.id, this.name, theme.label, this.origin, this.purpose, this.definition, this.unit, this.status,
       this.limit, this.pillar, this.periodicity, universe?.name, source?.title, source?.institution,
       ...this.measurements.map((m) => `${m.period.label} ${m.geography}`),
+      ...this.griLinks.map(({ disclosure, type }) => `${disclosure.label} ${disclosure.title} ${disclosure.standard} ${type.label}`),
     ].join(" ").toLocaleLowerCase("pt-BR");
     Object.freeze(this);
   }
@@ -55,6 +62,11 @@ export class Indicator {
   /** Ano da observação mais recente (usado no filtro de período). */
   get year() {
     return this.latestMeasurement?.period.year ?? this.referencePeriod?.year ?? "";
+  }
+
+  /** Anos cobertos pelo período do indicador ({ from, to }) ou null se não houver período. */
+  get yearRange() {
+    return toYearRange(this.year);
   }
 }
 
