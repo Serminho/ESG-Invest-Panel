@@ -24,9 +24,14 @@ export const CONFIG = Object.freeze({
   /** Valores da coluna Atuação que começam com este texto são indicadores internos. */
   internalOriginPrefix: "Interno",
 
+  /**
+   * Filtro de período: dois seletores (De / Até) com os últimos `windowYears` anos,
+   * contados a partir do ano atual. Indicadores sem período saem quando há limite.
+   */
+  periodFilter: { windowYears: 10 },
+
   /** Filtros de seleção; as opções vêm dos valores da planilha. */
   filters: [
-    { field: "year", allLabel: "Todos os períodos", ariaLabel: "Filtrar por período" },
     { field: "origin", allLabel: "Externos e internos", ariaLabel: "Filtrar por atuação" },
     { field: "status", allLabel: "Todas as classificações", ariaLabel: "Filtrar por classificação do dado" },
     // Campo com vários valores: o indicador passa se tiver vínculo com a norma escolhida.

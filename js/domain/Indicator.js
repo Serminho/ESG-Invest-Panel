@@ -1,4 +1,4 @@
-import { toText } from "../data/parse.js";
+import { toText, toYearRange } from "../data/parse.js";
 
 /**
  * Indicador (linha da Dim_Indicador) já ligado a tema, universo, fonte e observações.
@@ -62,6 +62,11 @@ export class Indicator {
   /** Ano da observação mais recente (usado no filtro de período). */
   get year() {
     return this.latestMeasurement?.period.year ?? this.referencePeriod?.year ?? "";
+  }
+
+  /** Anos cobertos pelo período do indicador ({ from, to }) ou null se não houver período. */
+  get yearRange() {
+    return toYearRange(this.year);
   }
 }
 

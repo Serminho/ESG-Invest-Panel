@@ -970,6 +970,16 @@ a:hover {
   max-width: 100%;
   min-width: 0;
 }
+/* De / Até lado a lado, como um único controle de período. */
+.period-filter {
+  display: inline-flex;
+  gap: 6px;
+  margin-right: 4px;
+  max-width: 100%;
+}
+.period-filter .filter-control {
+  min-width: 0;
+}
 .filters select.filter-control {
   max-width: 100%;
 }

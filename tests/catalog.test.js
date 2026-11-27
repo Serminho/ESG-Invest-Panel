@@ -158,3 +158,26 @@ test("GRI: filtro por norma, busca por código e planilha sem as abas", () => {
   assert.deepEqual(plain.distinctValues("griStandards"), []);
   assert.deepEqual(plain.indicators[0].griLinks, []);
 });
+
+test("período De / Até: sobreposição de anos, intervalos e indicadores sem período", async () => {
+  const { toYearRange } = await import("../js/data/parse.js");
+  assert.deepEqual(toYearRange("2025"), { from: 2025, to: 2025 });
+  assert.deepEqual(toYearRange("2023–2024"), { from: 2023, to: 2024 });
+  assert.equal(toYearRange(""), null);
+
+  const data = sheets();
+  data.Dim_Indicador.push(indicatorRow({ "ID_Indicador": "T9-01", "ID_Tema": "T9", "Período de referência": "PER-2017" }));
+  data.Dim_Indicador.push(indicatorRow({ "ID_Indicador": "T8-16", "Período de referência": "PER-2023-2024" }));
+  data.Dim_Periodo.push({ "ID_Periodo": "PER-2017", "Ano/intervalo": 2017, "Tipo": "Ano", "Descrição": "" });
+  data.Dim_Periodo.push({ "ID_Periodo": "PER-2023-2024", "Ano/intervalo": "2023–2024", "Tipo": "Intervalo", "Descrição": "" });
+  const catalog = buildCatalog(fakeWorkbook(data), CONFIG);
+  const search = (options) => ids(catalog.search(new IndicatorFilter(options)));
+
+  assert.deepEqual(search({}), ["T8-01", "T8-10", "T8-16", "T9-01", "T9-21", "T12-01"], "sem limite, todos aparecem");
+  assert.deepEqual(search({ yearFrom: "2024" }), ["T8-01", "T8-10", "T8-16", "T12-01"], "intervalo 2023–2024 toca 2024");
+  assert.deepEqual(search({ yearTo: "2023" }), ["T8-16", "T9-01"]);
+  assert.deepEqual(search({ yearFrom: "2018", yearTo: "2022" }), [], "nenhum ano no intervalo");
+  assert.deepEqual(search({ yearFrom: "2025", yearTo: "2017" }), search({ yearFrom: "2017", yearTo: "2025" }), "De maior que Até é invertido");
+  assert.ok(!search({ yearFrom: "2017" }).includes("T9-21"), "interno sem período sai quando há limite");
+  assert.deepEqual(ids(catalog.search(new IndicatorFilter({ yearFrom: 2025 }).withTheme("T12"))), ["T12-01"], "withTheme mantém o período");
+});

@@ -97,7 +97,8 @@ Tudo que depende do formato fica em `js/config.js`:
 - `dataFile`: caminho da planilha, relativo ao `index.html`.
 - `themesInScope`: temas exibidos. `null` mostra todos; ex.: `["T8", "T12"]`.
 - `sheets`: nome de cada aba e o cabeçalho de cada coluna. Se renomear uma coluna na planilha, ajuste aqui.
-- `filters`: campos dos filtros de seleção (`year`, `origin`, `status`, `griStandards`) e seus textos. Um filtro sem nenhum valor na planilha não aparece.
+- `periodFilter.windowYears`: quantos anos o filtro De / Até oferece (padrão: 10).
+- `filters`: campos dos filtros de seleção (`origin`, `status`, `griStandards`) e seus textos. Um filtro sem nenhum valor na planilha não aparece.
 - `internalOriginPrefix`: início da coluna `Atuação` que marca um indicador interno.
 - `themeAccents` e `fallbackAccents`: cores de cada tema.
 - `highlightsPerTheme`: quantos indicadores aparecem em destaque por tema na visão geral.
@@ -117,7 +118,7 @@ A página ativa fica no endereço (`#overview`, `#T8`, `#gri`, `#catalog`…), e
 
 ## Filtros
 
-- **Período:** ano da observação mais recente do indicador ou, na falta dela, do período de referência cadastrado em `Dim_Indicador`.
+- **Período (De / Até):** dois seletores com os últimos 10 anos, contados a partir do ano atual (em 2026: de 2017 a 2026). O período de um indicador é o da observação mais recente ou, na falta dela, o período de referência da `Dim_Indicador`. O indicador aparece se algum ano dele cair no intervalo: um período "2023–2024" entra em "De 2024". Basta preencher um dos lados para ter um limite aberto ("De 2024" = de 2024 em diante). Se um ano escolhido passar do outro limite, o outro acompanha. Indicadores sem período (os internos propostos) saem quando há limite.
 - **Atuação:** a origem exata de cada indicador (ex.: "Externo — benchmark público" ou "Interno — indicador fictício proposto").
 - **Classificação do dado:** valores da coluna `Classificação do dado`.
 - **Norma GRI:** indicadores com vínculo à norma escolhida (ex.: "GRI 404: Capacitação e Educação 2016"). Na página Conexão GRI, o índice mostra só as divulgações dessa norma.

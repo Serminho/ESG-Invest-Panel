@@ -73,3 +73,8 @@ test("página Conexão GRI: cobertura, índice e lacunas respeitam o filtro", as
   const noGri = buildCatalog(fakeWorkbook({ Dim_Indicador: [indicatorRow()] }), CONFIG);
   assert.equal(createViews(noGri, CONFIG).has("gri"), false, "sem Dim_GRI a página não aparece");
 });
+
+test("janela do filtro de período: últimos 10 anos até o ano atual", async () => {
+  const { periodYears } = await import("../js/ui/DashboardController.js");
+  assert.deepEqual(periodYears(2026, 10), [2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026]);
+});
